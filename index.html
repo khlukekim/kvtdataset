@@ -1,0 +1,120 @@
+<html>
+    <head>
+
+    </head>
+    <body>
+        <!-- for production
+        <script src="https://cdn.jsdeliver.net/net/npm/vue"></script>
+        -->
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <script src="data/segments.js"></script>
+        <script>
+            window.onload = function() {
+                var app = new Vue({
+                    el: '#app',
+                    data: {
+                        segments: segments,
+                    }
+                });
+            };
+        </script>
+
+        <div class="container">
+            <div class="row">
+                <div class="col my-3">
+                <h2>
+                    K-pop Singing Voice Tag Dataset (KVT dataset)
+                </h2>
+                </div>
+            </div>
+            <ul class="nav nav-tabs col-12" id="tabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="overview-tab" data-toggle="tab" href="#overview" role="tab" aria-controls="overview" aria-selected="true">Overview</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="datafiles-tab" data-toggle="tab" href="#datafiles" role="tab" aria-controls="datafiles" aria-selected="false">Data Files</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="segments-tab" data-toggle="tab" href="#segments" role="tab" aria-controls="segments" aria-selected="false">Segments</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Ratings</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Sample Code</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Retrieval Examples</a>
+                </li>
+            </ul>
+            <div class="tab-content col-12 my-2" id="tabContent">
+                <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+                    Work in progress...
+                </div>
+                <div class="tab-pane fade" id="datafiles" role="tabpanel" aria-labelledby="datafiles-tab">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>.pkl</th>
+                                <th>.json</th>
+                                <th>.js</th>
+                                <th>.npy</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>artists</td>
+                                <td><a href="data/artists.pkl">artists.pkl</a></td>
+                                <td><a href="data/artists.json">artists.json</a></td>
+                                <td><a href="data/artists.js">artists.js</a></td>
+                            </tr>
+                            <tr>
+                                <td>tags</td>
+                                <td><a href="data/tags.pkl">tags.pkl</a></td>
+                                <td><a href="data/tags.json">tags.json</a></td>
+                                <td><a href="data/tags.js">tags.js</a></td>
+                            </tr>
+                            <tr>
+                                <td>segments</td>
+                                <td><a href="data/segments.pkl">segments.pkl</a></td>
+                                <td><a href="data/segments.json">segments.json</a></td>
+                                <td><a href="data/segments.js">segments.js</a></td>
+                            </tr>
+                            <tr>
+                                <td>ratings</td>
+                                <td><a href="data/ratings.pkl">ratings.pkl</a></td>
+                                <td><a href="data/ratings.json">ratings.json</a></td>
+                                <td><a href="data/ratings.js">ratings.js</a></td>
+                                <td><a href="data/ratings.npy">ratings.npy</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="tab-pane fade" id="segments" role="tabpanel" aria-labelledby="segments-tab">
+                    <div id="app">
+                        <table class="table">
+                            <tr>
+                                <th>segID</th>
+                                <th>title</th>
+                                <th>artist</th>
+                                <th>offset</th>
+                            </tr>
+                            <tr v-for="segment in segments">
+                                <td>{{ segment.segID }}</td>
+                                <td>{{ segment.title }}</td>
+                                <td>{{ segment.artist }}</td>
+                                <td>{{ segment.offset }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </body>
+</html>
