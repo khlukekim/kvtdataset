@@ -12,23 +12,86 @@
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
         <script src="data/segments.js"></script>
+        <script src="data/songs.js"></script>
+        <script src="data/mean_song_ratings.js"></script>
         <script>
             window.onload = function() {
-                var app = new Vue({
-                    el: '#app',
+                var segmentListApp = new Vue({
+                    el: '#segmentList',
                     data: {
                         segments: segments,
-                    }
+                    },
+                });
+                var similarSongsApp = new Vue({
+                    el: '#similarSongs',
+                    data: {
+                        songs: songs,
+                        similarSongs: [],
+                        selectedSong: '',
+                    },
+                    methods: {
+                        showSimilarSongs: function(event) {
+                            this.similarSongs = findSimilarSongs(event.target.value);
+                        },
+                    },
                 });
             };
+
+            // code from https://stackoverflow.com/questions/51362252/javascript-cosine-similarity-function
+            function cosineSimilarity(A, B){
+                var dotproduct=0;
+                var mA=0;
+                var mB=0;
+                for(i = 0; i < A.length; i++){
+                    dotproduct += (A[i] * B[i]);
+                    mA += (A[i] * A[i]);
+                    mB += (B[i] * B[i]);
+                }
+                mA = Math.sqrt(mA);
+                mB = Math.sqrt(mB);
+                return dotproduct / (mA * mB);
+            }
+
+            function findSimilarSongs(songIndex) {
+                var sim = mean_song_ratings.map(function(item, index, array) {
+                    if (index == songIndex) {
+                        return 0;
+                    } else {
+                        return cosineSimilarity(array[songIndex], item);
+                    }
+                });
+
+                var similarSongIndices = sortWithIndices(sim);
+                var mostSimilarSongs = [];
+                for(var i = 0; i < 10; i++) {
+                    mostSimilarSongs.push(songs[similarSongIndices[i]]);
+                }
+                return mostSimilarSongs;
+            }
+
+            function sortWithIndices(array) {
+                var arrayWithIndex = [];
+                for (var i = 0; i < array.length; i++) {
+                    arrayWithIndex.push([array[i], i]);
+                }
+                arrayWithIndex.sort(function(left, right) {
+                    return left[0] > right[0] ? -1 : 1;
+                });
+                var sortedIndices = [];
+                for (var i = 0; i < arrayWithIndex.length; i++) {
+                    sortedIndices.push(arrayWithIndex[i][1]);
+                }
+                return sortedIndices;
+            }
+            
         </script>
 
         <div class="container">
             <div class="row">
                 <div class="col my-3">
-                <h2>
-                    K-pop Singing Voice Tag Dataset (KVT dataset)
-                </h2>
+                    <h2>
+                        K-pop Singing Voice Tag Dataset (KVT dataset)
+                    </h2>
                 </div>
             </div>
             <ul class="nav nav-tabs col-12" id="tabs" role="tablist">
@@ -42,18 +105,38 @@
                     <a class="nav-link" id="segments-tab" data-toggle="tab" href="#segments" role="tab" aria-controls="segments" aria-selected="false">Segments</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Ratings</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Sample Code</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Retrieval Examples</a>
+                    <a class="nav-link" id="examples-tab" data-toggle="tab" href="#examples" role="tab" aria-controls="examples" aria-selected="false">Examples</a>
                 </li>
             </ul>
             <div class="tab-content col-12 my-2" id="tabContent">
                 <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
-                    Work in progress...
+                    
+                    <h3 class="my-3">
+                        TL;DR
+                    </h3>
+                    <div>
+                        KVT dataset provides semantic labels of singing voices from K-pop songs.
+                    </div>
+                    <h3 class="my-3">
+                        Notable Features
+                    </h3>
+                    <ul>
+                        <li>K-pop songs!</li>
+                        <li>Tags are about singing voices.</li>
+                        <li>Ratings are collected from a survey, not mined from social data.</li>
+                        <li>Each rating is about a 10-second-long segment with vocal presence.</li>
+                    </ul>
+                    <h3 class="my-3">
+                        Note
+                    </h3>
+                    <div>
+                        Due to copyright issue, we don't provide audio data. 
+                        Instead, we are adding links to music content provider(including Youtube) for each song.
+                        Also you can download mfcc data of our audio data, which can be used to check if your version of audio data is consistent to ours. 
+                    </div>
                 </div>
                 <div class="tab-pane fade" id="datafiles" role="tabpanel" aria-labelledby="datafiles-tab">
                     <table class="table">
@@ -63,7 +146,7 @@
                                 <th>.pkl</th>
                                 <th>.json</th>
                                 <th>.js</th>
-                                <th>.npy</th>
+                                <th>others</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -81,6 +164,13 @@
                             </tr>
                             <tr>
                                 <td>segments</td>
+                                <td><a href="data/songs.pkl">songs.pkl</a></td>
+                                <td><a href="data/songs.json">songs.json</a></td>
+                                <td><a href="data/songs.js">songs.js</a></td>
+                                <td><a href="data/songs.tsv">songs.tsv (v. 0.1)</a></td>
+                            </tr>
+                            <tr>
+                                <td>segments</td>
                                 <td><a href="data/segments.pkl">segments.pkl</a></td>
                                 <td><a href="data/segments.json">segments.json</a></td>
                                 <td><a href="data/segments.js">segments.js</a></td>
@@ -92,11 +182,78 @@
                                 <td><a href="data/ratings.js">ratings.js</a></td>
                                 <td><a href="data/ratings.npy">ratings.npy</a></td>
                             </tr>
+                            <tr>
+                                <td>mean song ratings</td>
+                                <td><a href="data/mean_song_ratings.pkl">mean_song_ratings.pkl</a></td>
+                                <td><a href="data/mean_song_ratings.json">mean_song_ratings.json</a></td>
+                                <td><a href="data/mean_song_ratings.js">mean_song_ratings.js</a></td>
+                                <td><a href="data/mean_song_ratings.npy">mean_song_ratings.npy</a></td>
+                            </tr>
+                            <tr>
+                                <td>mfcc</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><a href="data/mfcc.zip">mfcc.zip</a></td>
+                            </tr>
                         </tbody>
                     </table>
+                    
+                    <h3 class="my-3">
+                        Data files
+                    </h3>
+                    <div>
+                        Data files in the above table contain all the important data except audio files. 
+                    </div>
+
+                    <h3 class="my-3">
+                        Audio files
+                    </h3>
+                    <div>
+                        We're updating links to music content providers for each songs in "Songs" section and "songs.tsv" file. 
+                        You may buy or download audio data from specified links.
+                        For segmentation, "segments.*"" files contain offset information.
+                        For validation, you can consult "mfcc.zip", which contains MFCC data of our version of segment audio files.
+                    </div>
+
+                    <h3 class="my-3">
+                        File formats
+                    </h3>
+                    <div>
+                        <ul>
+                            <li>
+                                .pkl files are pickle dump of Python dict object.
+                                We used Python3 in the process.
+                                If you're using Python2, it will be much easier to read .json files and use json module to parse them.
+                            </li>
+                            <li>
+                                .json files contain data in JSON format, and .js files contain "var VARNAME = " and what their .json counterparts have.
+                                You can imnport .js files in HTML. This page, for example, uses "segments.js" to make list of semgents in the "Segments" tab with Vuejs.
+                            </li>
+                            <li>
+                                ratings.npy file contain a numpy array. The order of tags are in tag files.
+                            </li>
+                            <li>
+                                Unlike other songs files, songs.tsv contains links to content providers only and will be frequently updated. 
+                            </li>
+                        </ul>
+                    </div>
+
+                    <h3 class="my-3">
+                        Note
+                    </h3>
+                    <div>
+                        <ul>
+                            <li>
+                                Currently, song titles and artist names are mostly in Korean(unicode string). 
+                                We're trying to match official English titles and names now. 
+                                English versions will be added after the process.
+                            </li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="tab-pane fade" id="segments" role="tabpanel" aria-labelledby="segments-tab">
-                    <div id="app">
+                    <div id="segmentList">
                         <table class="table">
                             <tr>
                                 <th>segID</th>
@@ -111,6 +268,38 @@
                                 <td>{{ segment.offset }}</td>
                             </tr>
                         </table>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="examples" role="tabpanel" aria-labelledby="examples-tab">
+                    <div id="similarSongs">
+                        <h3 class="my-3">
+                            Song Retrieval
+                        </h3>
+                        <h5 class="my-2">
+                            Query song
+                        </h5>
+                        <select v-model="selectedSong" v-on:change="showSimilarSongs">
+                            <option disabled value="">Please select one</option>
+                            <option v-for="(song, index) in songs" :value="index">{{song[0]}} - {{song[1]}}</option>
+                        </select>
+                        <h5 class="my-2">
+                            Similar songs
+                        </h5>
+                        <ol>
+                            <li v-for="song in similarSongs">
+                                {{song[0]}} - {{song[1]}}
+                            </li>
+                        </ol>
+                        <h5 class="my-2">
+                            Note
+                        </h5>
+                        <div>
+                            You can find songs from the same artist are listed in similar songs. <br>
+                            Similarity between two songs can be calculated by cosine similarity of mean ratings for each song from their segment ratings respectively.
+                            We used precaluated cosine similarity from "mean_song_ratings.js" here. <br>
+                            Check the source code of this page to see how similar songs are retrieved.
+                        </div>
                     </div>
                 </div>
             </div>
