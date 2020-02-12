@@ -13,7 +13,22 @@
         <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
         <script src="data/segments.js"></script>
         <script src="data/songs.js"></script>
+        <script src="data/tags.js"></script>
+        <script src="data/tags_pred.js"></script>
+        <script src="data/bomnal_pred.js"></script>
         <script src="data/mean_song_ratings.js"></script>
+        <style>
+        .rotate {
+
+            transform: rotate(-90deg);
+            -webkit-transform: rotate(-90deg);
+            -moz-transform: rotate(-90deg);
+            -ms-transform: rotate(-90deg);
+            -o-transform: rotate(-90deg);
+            filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+
+        }
+        </style>
         <script>
             window.onload = function() {
                 var segmentListApp = new Vue({
@@ -35,6 +50,32 @@
                         },
                     },
                 });
+
+                var predDiv = document.getElementById('predictionGraph');
+                for (var i = 0; i < 42; i ++) {
+                    var span = document.createElement('span');
+                    span.id = 'graphBar'+i;
+                    span.style.backgroundColor = 'lightgray';
+                    span.style.position = 'absolute';
+                    span.style.left = 20 * i + 'px';
+                    span.style.width = '16px';
+                    span.style.bottom = 0;
+                    span.style.transition = 'height 0.5 linear';
+                    predDiv.appendChild(span);
+
+                    span = document.createElement('span');
+                    span.innerText = tags_pred[i];
+                    span.style.position = 'absolute';
+                    span.style.left = -90 + 20 * i + 'px';
+                    span.style.width = '200px';
+                    span.style.height = '20px';
+                    span.style.bottom = '100px';
+                    span.className = 'rotate';
+                    span.style.fontSize = '8px';
+                    predDiv.appendChild(span);
+                }
+
+                window.requestAnimationFrame(draw);
             };
 
             // code from https://stackoverflow.com/questions/51362252/javascript-cosine-similarity-function
@@ -82,6 +123,22 @@
                     sortedIndices.push(arrayWithIndex[i][1]);
                 }
                 return sortedIndices;
+            }
+
+            function draw() {
+                if (!document.getElementById('predictionAudio').paused) {
+                    drawPredictionGraph()
+                }
+                window.requestAnimationFrame(draw);
+            }
+
+            function drawPredictionGraph() {
+                var t = document.getElementById('predictionAudio').currentTime;
+                var n = Math.floor(t / (107 / 43));
+                var v = pred[n];
+                for(var i = 0; i<42; i++) {
+                    document.getElementById('graphBar'+i).style.height = 200 * v[i];
+                }
             }
             
         </script>
@@ -295,10 +352,20 @@
                             Note
                         </h5>
                         <div>
+
                             You can find songs from the same artist are listed in similar songs. <br>
                             Similarity between two songs can be calculated by cosine similarity of mean ratings for each song from their segment ratings respectively.
                             We used precaluated cosine similarity from "mean_song_ratings.js" here. <br>
                             Check the source code of this page to see how similar songs are retrieved.
+                        </div>
+                    </div>
+                    <div id="predictionDiv">
+                        <h3 class="my-3">
+                            Prediction Demo
+                        </h3>
+                        <audio id='predictionAudio' controls src='data/bomnal.mp3'></audio>
+                        <div id="predictionGraph" style="height:200px; width:840px;position:relative;">
+                            
                         </div>
                     </div>
                 </div>
