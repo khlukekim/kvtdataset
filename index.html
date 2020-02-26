@@ -15,7 +15,10 @@
         <script src="data/songs.js"></script>
         <script src="data/tags.js"></script>
         <script src="data/tags_pred.js"></script>
-        <script src="data/bomnal_pred.js"></script>
+        <script src="data/pred_naul1_mix.js"></script>
+        <script src="data/pred_naul1_song_mix.js"></script>
+        <script src="data/pred_sohyang2_mix.js"></script>
+        <script src="data/pred_sohyang2_song_mix.js"></script>
         <script src="data/mean_song_ratings.js"></script>
         <style>
         .rotate {
@@ -30,6 +33,7 @@
         }
         </style>
         <script>
+            var demoPredictionData = [];
             window.onload = function() {
                 var segmentListApp = new Vue({
                     el: '#segmentList',
@@ -51,32 +55,43 @@
                     },
                 });
 
-                var predDiv = document.getElementById('predictionGraph');
-                for (var i = 0; i < 42; i ++) {
-                    var span = document.createElement('span');
-                    span.id = 'graphBar'+i;
-                    span.style.backgroundColor = 'lightgray';
-                    span.style.position = 'absolute';
-                    span.style.left = 20 * i + 'px';
-                    span.style.width = '16px';
-                    span.style.bottom = 0;
-                    span.style.transition = 'height 0.5 linear';
-                    predDiv.appendChild(span);
-
-                    span = document.createElement('span');
-                    span.innerText = tags_pred[i];
-                    span.style.position = 'absolute';
-                    span.style.left = -90 + 20 * i + 'px';
-                    span.style.width = '200px';
-                    span.style.height = '20px';
-                    span.style.bottom = '100px';
-                    span.className = 'rotate';
-                    span.style.fontSize = '8px';
-                    predDiv.appendChild(span);
-                }
+                initDemo();
 
                 window.requestAnimationFrame(draw);
             };
+
+            function initDemo() {
+                demoPredictionData[0] = [pred_naul1_seg, pred_naul1_song];
+                demoPredictionData[1] = [pred_sohyang2_seg, pred_sohyang2_song];
+                
+                for (var demo_id = 0; demo_id < 2; demo_id++) {
+                    for (var demoGraphType = 0; demoGraphType < 2; demoGraphType++) {
+                        var predDiv = document.getElementById('predictionGraph' + demo_id + '_' + demoGraphType);
+                        for (var i = 0; i < 42; i ++) {
+                            var span = document.createElement('span');
+                            span.id = 'graphBar' + demo_id + '_' + demoGraphType + '_' + i;
+                            span.style.backgroundColor = 'lightgray';
+                            span.style.position = 'absolute';
+                            span.style.left = 20 * i + 'px';
+                            span.style.width = '16px';
+                            span.style.bottom = 0;
+                            span.style.transition = 'height 0.5 linear';
+                            predDiv.appendChild(span);
+
+                            span = document.createElement('span');
+                            span.innerText = tags_pred[i];
+                            span.style.position = 'absolute';
+                            span.style.left = -90 + 20 * i + 'px';
+                            span.style.width = '200px';
+                            span.style.height = '20px';
+                            span.style.bottom = '100px';
+                            span.className = 'rotate';
+                            span.style.fontSize = '8px';
+                            predDiv.appendChild(span);
+                        }
+                    }
+                }
+            }
 
             // code from https://stackoverflow.com/questions/51362252/javascript-cosine-similarity-function
             function cosineSimilarity(A, B){
@@ -126,18 +141,22 @@
             }
 
             function draw() {
-                if (!document.getElementById('predictionAudio').paused) {
-                    drawPredictionGraph()
+                for(var demo_id = 0; demo_id < 2; demo_id++) {
+                    if (!document.getElementById('predictionAudio' + demo_id).paused) {
+                        drawPredictionGraph(demo_id)
+                    }
                 }
                 window.requestAnimationFrame(draw);
             }
 
-            function drawPredictionGraph() {
-                var t = document.getElementById('predictionAudio').currentTime;
-                var n = Math.floor(t / (107 / 43));
-                var v = pred[n];
-                for(var i = 0; i<42; i++) {
-                    document.getElementById('graphBar'+i).style.height = 200 * v[i];
+            function drawPredictionGraph(demo_id) {
+                var t = document.getElementById('predictionAudio' + demo_id).currentTime;
+                var n = Math.floor(t / (10 / 43));
+                for (var demoGraphType = 0; demoGraphType < 2; demoGraphType++) {
+                    var v = demoPredictionData[demo_id][demoGraphType][n];
+                    for(var i = 0; i<42; i++) {
+                        document.getElementById('graphBar' + demo_id + '_' + demoGraphType + '_' + i).style.height = 200 * v[i];
+                    }
                 }
             }
             
@@ -166,6 +185,9 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" id="examples-tab" data-toggle="tab" href="#examples" role="tab" aria-controls="examples" aria-selected="false">Examples</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="demos-tab" data-toggle="tab" href="#demos" role="tab" aria-controls="demos" aria-selected="false">Demos</a>
                 </li>
             </ul>
             <div class="tab-content col-12 my-2" id="tabContent">
@@ -329,6 +351,7 @@
                 </div>
 
                 <div class="tab-pane fade" id="examples" role="tabpanel" aria-labelledby="examples-tab">
+
                     <div id="similarSongs">
                         <h3 class="my-3">
                             Song Retrieval
@@ -359,12 +382,37 @@
                             Check the source code of this page to see how similar songs are retrieved.
                         </div>
                     </div>
+                </div>
+
+                <div class="tab-pane fade" id="demos" role="tabpanel" aria-labelledby="demos-tab">
                     <div id="predictionDiv">
                         <h3 class="my-3">
                             Prediction Demo
                         </h3>
-                        <audio id='predictionAudio' controls src='data/bomnal.mp3'></audio>
-                        <div id="predictionGraph" style="height:200px; width:840px;position:relative;">
+                        <h4>
+                            NAUL - Memory of The Wind
+                        </h4>
+                        <audio id='predictionAudio0' controls src='data/naul1_segment.wav'></audio>
+                        <h5>Model trained with segment-level labels</h5>
+                        <div id="predictionGraph0_0" style="height:200px; width:840px;position:relative;">
+                            
+                        </div>
+                        <h5>Model trained with song-level labels</h5>
+                        <div id="predictionGraph0_1" style="height:200px; width:840px;position:relative;">
+                            
+                        </div>
+                        <hr>
+                        
+                        <h4>
+                            Sohyang - Fate
+                        </h4>
+                        <audio id='predictionAudio1' controls src='data/sohyang2_segment.wav'></audio>
+                        <h5>Model trained with segment-level labels</h5>
+                        <div id="predictionGraph1_0" style="height:200px; width:840px;position:relative;">
+                            
+                        </div>
+                        <h5>Model trained with song-level labels</h5>
+                        <div id="predictionGraph1_1" style="height:200px; width:840px;position:relative;">
                             
                         </div>
                     </div>
